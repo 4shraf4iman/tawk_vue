@@ -8,5 +8,5 @@ But if you want to move things around, feel free to do so.
 ### Instructions
 
 - Clone this repo
-- Complete this task by pushing it to your repo and send the link to us
-- Please incorporate the included modules into your solution. Other modules are up to you.
+- 'npm install'
+- PLease install Python version 2 ++ before proceed NPM install!
