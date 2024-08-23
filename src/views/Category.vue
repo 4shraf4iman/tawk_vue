@@ -1,32 +1,11 @@
 <template>
-
-<div class="result">
-<div v-if="query && query.trim() && displayArticles.length > 0" class="article-list">
-        <div v-for="article in displayArticles" :key="article.id" class="article-card2">
-          <router-link :to="{ name: 'Category', params: { id: article.id } }">
-            <div class="article-card-content">
-              <div class="article-icon">
-                <i class="fa-regular fa-file-lines"></i>
-              </div>
-              <div class="article-details">
-                <h2>{{ article.title }}</h2>
-                <p class="date">Updated on {{ formatDate(article.updatedOn) }}</p>
-              </div>
-              <div class="article-action">
-                <i class="fa-solid fa-chevron-right"></i>
-              </div>
-            </div>
-          </router-link>
-        </div>
-  </div>
-</div>
   
   <div class="home">
      <!-- Spinner with Backdrop -->
      <div v-if="loading" class="backdrop">
       <div class="spinner"></div>
     </div>
-
+   
     <!-- Breadcrumb Navigation -->
     <div v-if="category" class="breadcrumb">
       <router-link to="/">
@@ -62,22 +41,30 @@
         </div>
       </div>
      
-      <div class="article-list">
-        <div  v-for="article in displayArticles" :key="article.id" class="article-card">
-          <div class="article-card-content">
-            <div class="article-icon">
-              <i class="fa-regular fa-file-lines"></i>
+      <div v-if="query && query.trim() && displayArticles.length > 0" class="article-list">
+        <div v-for="article in displayArticles" :key="article.id" class="article-card2">
+          <router-link :to="{ name: 'Category', params: { id: article.id } }">
+            <div class="article-card-content">
+              <div class="article-icon">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <div class="article-details">
+                <h2>{{ article.title }}</h2>
+                <p class="date">Updated on {{ formatDate(article.updatedOn) }}</p>
+              </div>
+              <div class="article-action">
+                <i class="fa-solid fa-chevron-right"></i>
+              </div>
             </div>
-            <div class="article-details">
-              <h2>{{ article.title }}</h2>
-              <p class="date">Updated on {{ formatDate(article.updatedOn) }}</p>
-            </div>
-            <div class="article-action">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </div>
+          </router-link>
         </div>
-      </div>
+  </div>
+
+  <div else class="article-list">
+        <div  class="article-card2">
+          No result {{ query }}
+        </div>
+  </div>
     </div>
     <hr style="width: 100%; height: 2px; background-color: #dbdbdb; border: none; margin-top: 10%; margin-bottom: 5%;"/>
 
