@@ -1,4 +1,26 @@
 <template>
+
+<div class="result">
+<div v-if="query && query.trim() && displayArticles.length > 0" class="article-list">
+        <div v-for="article in displayArticles" :key="article.id" class="article-card2">
+          <router-link :to="{ name: 'Category', params: { id: article.id } }">
+            <div class="article-card-content">
+              <div class="article-icon">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <div class="article-details">
+                <h2>{{ article.title }}</h2>
+                <p class="date">Updated on {{ formatDate(article.updatedOn) }}</p>
+              </div>
+              <div class="article-action">
+                <i class="fa-solid fa-chevron-right"></i>
+              </div>
+            </div>
+          </router-link>
+        </div>
+  </div>
+</div>
+  
   <div class="home">
      <!-- Spinner with Backdrop -->
      <div v-if="loading" class="backdrop">
@@ -39,9 +61,9 @@
           <p>Loading...</p>
         </div>
       </div>
-
-      <div v-if="publishedArticles.length" class="articles-list">
-        <div v-for="article in publishedArticles" :key="article.id" class="article-card">
+     
+      <div class="article-list">
+        <div  v-for="article in displayArticles" :key="article.id" class="article-card">
           <div class="article-card-content">
             <div class="article-icon">
               <i class="fa-regular fa-file-lines"></i>
@@ -88,7 +110,6 @@
   </div>
 </template>
 
-
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -101,25 +122,30 @@ import 'swiper/css/navigation';
 
 export default {
   name: 'Category',
+  props: {
+    searchQuery: {
+      type: String,
+      default: ''
+    }
+  },
   components: {
     Swiper,
     SwiperSlide,
   },
-  setup() {
+  setup(props) {
     const route = useRoute();
     const router = useRouter();
     const category = ref(null);
     const articles = ref([]);
-    const publishedArticles = ref([]);
     const otherCategories = ref([]);
-    const swiperRef = ref(null);
     const loading = ref(true);
     const modules = [Navigation];
+    const query = ref(props.searchQuery);
 
+    // Fetch data from the API
     const fetchData = async (categoryId) => {
       loading.value = true;
       try {
-       
         const response = await axios.get(`http://localhost:9000/api/categories`);
         const allCategories = response.data;
         category.value = allCategories.find(cat => cat.id === categoryId);
@@ -127,7 +153,6 @@ export default {
 
         const articlesResponse = await axios.get(`http://localhost:9000/api/category/${categoryId}/articles`);
         articles.value = articlesResponse.data;
-        publishedArticles.value = articles.value.filter(article => article.status === 'published');
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -135,6 +160,7 @@ export default {
       }
     };
 
+    // Fetch data on mount and when category ID changes
     onMounted(() => {
       fetchData(route.params.id);
     });
@@ -148,8 +174,21 @@ export default {
       }
     );
 
+    // Compute filtered categories
     const filteredCategories = computed(() => {
       return otherCategories.value.filter(cat => cat.enabled);
+    });
+
+    // Compute search results based on query
+    const searchArticles = computed(() => {
+      const queryValue = query.value.trim().toLowerCase();
+      return articles.value.filter(article => article.title.toLowerCase().includes(queryValue));
+    });
+
+    // Compute display articles based on search query
+    const displayArticles = computed(() => {
+      const queryValue = query.value.trim();
+      return queryValue ? searchArticles.value : [];
     });
 
     // Function to get relative time in days or years
@@ -182,15 +221,22 @@ export default {
       }
     };
 
+    // Watch for changes in props.searchQuery
+    watch(
+      () => props.searchQuery,
+      (newQuery) => {
+        query.value = newQuery;
+      }
+    );
+
     return {
       category,
-      publishedArticles,
+      query,
+      searchArticles,
+      displayArticles,
       getRelativeTime,
       formatDate,
       filteredCategories,
-      otherCategories,
-      swiperRef,
-      modules,
       loading,
     };
   }
@@ -295,6 +341,8 @@ p {
 .articles-list {
   display: flex;
   flex-direction: column;
+  align-items: center; 
+  margin: 0 auto!important; 
 }
 
 .article-card {
@@ -306,10 +354,24 @@ p {
   text-align: left;
 }
 
+.article-card2 {
+  background-color: white;
+  text-decoration: none; 
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+  width:100%;
+  margin:auto;
+  margin:0;
+}
+
 .article-card-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  text-decoration: none;
 }
 
 .article-icon {
@@ -325,11 +387,19 @@ p {
 .article-details h2 {
   margin: 0;
   font-size: 18px; 
+  text-decoration: none;
+}
+
+.result {
+  display: grid;
+  justify-content: center; 
+  width: 100%;
 }
 
 .article-details p {
   margin: 5px 0;
   font-size: 14px; 
+  text-decoration: none;
 }
 
 .breadcrumb {
@@ -393,6 +463,12 @@ p {
 
  
 }
+
+.router-link{
+  text-decoration: none!;
+}
+
+
 
 .swiper-slide-link {
   text-decoration: none;
